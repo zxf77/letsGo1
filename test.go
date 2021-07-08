@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 //定义常量
@@ -300,6 +301,18 @@ LABEL1: //标签
 	structTest1.Name = "zhengxf"
 	structTest1.Age = 19*/
 	fmt.Println("自己的结构体struct", structTest1)
+
+	//字符串String
+	//直接使用+ 拼接字符串
+	str2 := "测试拼接字符串hello" + " " + "world"
+	//简写的+=形式
+	str2 += "拼接成功"
+	fmt.Println(str2)
+	//其它方法拼接字符串
+	str3 := fmt.Sprintf("%d : %s", 2021, "年拼接字符串") //逻辑复杂 用了interface 性能一般般
+	fmt.Println(str3)
+	fmt.Println(strings.Join([]string{"hello", "world测试拼接"}, ",")) //这个方法已有一个数组的情况下，这种效率会很高，但是本来没有，去构造这个数据的代价也不小。
+	//还可以使用bytes.Buffer  strings.Builder(非线程安全)
 
 }
 func test() {
