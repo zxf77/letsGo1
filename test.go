@@ -46,6 +46,12 @@ type (
 	文本     string
 )
 
+//定义结构
+type myStructPerson struct {
+	Name string
+	Age  int
+}
+
 //main()函数是程序入口点
 func main() {
 	fmt.Println("hello wordl!")
@@ -280,9 +286,20 @@ LABEL1: //标签
 	defer fmt.Println("c")*/
 	//for循环来使用defer
 	for i := 0; i < 3; i++ {
-		defer fmt.Println(i)
+		//defer fmt.Println(i)
 	}
 	//defer的高级调用
+
+	//结构
+	structTest1 := myStructPerson{
+		//字面值初始化的方法
+		Name: "joe",
+		Age:  17,
+	}
+	/*一般方法初始化
+	structTest1.Name = "zhengxf"
+	structTest1.Age = 19*/
+	fmt.Println("自己的结构体struct", structTest1)
 
 }
 func test() {
