@@ -4,6 +4,7 @@ package main
 //导入的包
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -51,6 +52,47 @@ type (
 type myStructPerson struct {
 	Name string
 	Age  int
+}
+
+//结构里面会有匿名结构
+type myNoNameStruct struct {
+	Name string
+	Age  int
+	//这下面是匿名结构
+	Contact struct {
+		Phone, City string
+	}
+}
+
+//定义接口
+type USB interface {
+	Name() string //方法和返回类型是string
+	Connect()
+}
+type PhoneConnector struct {
+	name string
+}
+
+//实现接口 的方法
+func (pc PhoneConnector) Name() string {
+	return pc.name
+}
+
+//实现接口的另一个方法
+func (pc PhoneConnector) Connect() {
+	fmt.Println("通过接口实现的方法Connect:", pc.name)
+}
+
+//学习反射 定义一个结构
+type User struct {
+	Id   int
+	Name string
+	Age  int
+}
+
+//这个结构的方法
+func (u User) Hello() {
+	fmt.Println("结构的方法 hello")
 }
 
 //main()函数是程序入口点
@@ -297,11 +339,36 @@ LABEL1: //标签
 		Name: "joe",
 		Age:  17,
 	}
+	structTest1.methodTest()
 	/*一般方法初始化
 	structTest1.Name = "zhengxf"
 	structTest1.Age = 19*/
 	fmt.Println("自己的结构体struct", structTest1)
-
+	//结构初始化建议使用取地址符号,这样修改或者调用函数可以直接引用
+	structTest2 := &myStructPerson{
+		Name: "zhengxf",
+		Age:  23,
+	}
+	fmt.Println("指针的取地址,函数修改前", structTest2)
+	changeStruct(structTest2)
+	fmt.Println("函数修改后", structTest2)
+	//匿名结构.同样可以加上取地址符来变成引用类型。
+	noNameStruct := struct {
+		Name string
+		Age  int
+	}{
+		Name: "zzzz",
+		Age:  111,
+	}
+	fmt.Println("匿名结构", noNameStruct)
+	//结构里面有匿名结构
+	noNameStruct1 := myNoNameStruct{
+		Name: "test",
+		Age:  22,
+	}
+	noNameStruct1.Contact.Phone = "1313131"
+	noNameStruct1.Contact.City = "bj"
+	fmt.Println("结构里面有匿名结构", noNameStruct1)
 	//字符串String
 	//直接使用+ 拼接字符串
 	str2 := "测试拼接字符串hello" + " " + "world"
@@ -313,6 +380,34 @@ LABEL1: //标签
 	fmt.Println(str3)
 	fmt.Println(strings.Join([]string{"hello", "world测试拼接"}, ",")) //这个方法已有一个数组的情况下，这种效率会很高，但是本来没有，去构造这个数据的代价也不小。
 	//还可以使用bytes.Buffer  strings.Builder(非线程安全)
+
+	//方法method
+	var methodTest USB //接口
+	methodTest = PhoneConnector{"Phone"}
+	methodTest.Connect()
+
+	//反射
+	uu := User{1, "ok", 22}
+	info(uu)
+
+	/**
+	并发学习，
+	*/
+	//goroutine最简单的用法
+	/*go Go()
+	time.Sleep(2 * time.Second)	//休眠两秒钟*/
+	//通过channel来通信
+	ccc := make(chan bool)
+	go func() {
+		fmt.Println("GO通过通信来并发")
+		ccc <- true
+
+		//最好需要手动关闭
+		close(ccc)
+	}()
+	for val := range ccc { //可以forr一直迭代channel
+		fmt.Println("到这了", val)
+	}
 
 }
 func test() {
@@ -345,4 +440,46 @@ func clouure(x int) func(int) int {
 	return func(y int) int {
 		return x + y
 	}
+}
+
+/**
+修改结构内容的方法，传参用指针，声明结构的时候加上&。传参的时候不用&
+*/
+func changeStruct(person *myStructPerson) {
+	person.Age = 77
+	fmt.Println("函数中修改结构", person)
+}
+
+/**
+方法 method  通过接收者receiver判断是哪个结构的方法,第一个括号定义的哪个结构
+如果方法的结构不同，则可以重名，通过结构体.method 来判断调用哪个方法
+receiver也同样可以用值传递或者引用指针传递
+方法可以访问私有字段
+*/
+func (a myStructPerson) methodTest() {
+	fmt.Println("这是方法method")
+}
+
+/**
+反射使用的函数
+参数是一个空接口
+*/
+func info(o interface{}) {
+	t := reflect.TypeOf(o)
+	fmt.Println("反射获取到的接口类型type:", t.Name(), t)
+
+	v := reflect.ValueOf(o)
+	fmt.Println("Fields:", v)
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+		val := v.Field(i).Interface()
+		fmt.Printf("%6s: %v = %v\n", f.Name, f.Type, val)
+	}
+}
+
+/**
+并行学习定义函数
+*/
+func Go() {
+	fmt.Println("gogogo 并行")
 }
